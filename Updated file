@@ -41,6 +41,10 @@ for i in range(1):
         print(f)
         print(a)
 
-mynm_seq=my_seq.toseq()                                     #What are toseq() and transcribe() and    
-mrna_seq=mynm_seq.transcribe()                              #  Where are these defined ?    
-print(mrna_seq.translate(mrna_seq))                                 #Translation gives an error
+mynm_seq=my_seq.toseq()                                     
+mrna_seq=mynm_seq.transcribe()
+
+##
+#Check how to call the sequnce from the 'mrna_seq' class
+##
+print(mrna_seq.translate(mrna_seq))                         
