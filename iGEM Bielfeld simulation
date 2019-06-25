@@ -1,0 +1,96 @@
+#iGEM Bielefeld Biosensor
+import numpy as np
+from scipy.integrate import odeint
+import matplotlib.pyplot as plt
+
+def model(z,t):
+    
+    #Initialize some constants
+    vTX1 = 18.2       #reporter transcription rate constant
+    vTX2 = 18.2       #repressor transcription rate constant
+    KTX1 = 8.5        #Michaelis-Menten constant for reporter transcription 
+    KTX2 = 8.5        #Michaelis-Menten constant for repressor transcription
+    lam_m1 = 0.08     #reporter mRNA degradation rate constant
+    lam_m2 = 0.08     #repressor mRNA degradation rate constant
+    kTL1 = 0.0076     #reporter translation rate constant
+    kTL2 = 0.0076     #repressor translation rate constant
+    KTL1 = 29.9       #Michaelis-Menten constant for translation of reporter
+    KTL2 = 29.9       #Michaelis-Menten constant for translation of repressor
+    vlamTLR = 13.5    #Translation resources degradation rate constant
+    KlamTLR = 53.2    #Michaelis-Menten constant for degradation of TL resources
+    kmat = 0.2        #reporter maturation rate constant
+    k2R = 50          #repressor dimerization rate constant
+    k_2R  = 0.001     #repressor dimer dissociation rate constant
+    kr = 960          #association rate constant for repression
+    k_r = 2.4         #dissociation rate constant for repression
+    kdr1 = 3.0e7      #association rate constant for first derepression mechanism 
+    k_dr1 = 12        #dissociation rate constant for first derepression mechanism
+    kdr2 = 3.0e7      #association rate constant for second derepression mechanism   
+    k_dr2 = 4800      #dissociation rate constant for second derepression mechanism
+    kleak = 0.0033    #leak reporter transcription rate constant
+        
+    #Initialize variables in a vector
+    mR = z[0]         #repressor mRNA
+    R = z[1]          #repressor monomer
+    R2 = z[2]         #repressor dimer
+    R2O = z[3]        #free operator of reporter gene
+    A = z[4]          #repressor-operator complex
+    R2A2 = z[5]       #analyte
+    O = z[6]          #inactive repressor
+    mF = z[7]         #reporter mRNA
+    Fin = z[8]        #inactive reporter
+    F = z[9]          #reporter
+    TLR = z[10]       #Translation resources
+    
+    #ODEs  
+    dmRdt = (vTX2*(GR**2)/((KTX1**2)+(GR**2))) - lam_m2*mR                              #Repressor mRNA Conc
+    dRdt = (kTL2*TLR*(mR**3)/((KTL2**3)+(mR**3)+(mF**3))) - 2*k2R*(R**2) + 2*k_2R*R2    #Repressor Conc  
+    dR2dt = k2R*(R**2) - k_2R*R2 - kr*R2*O + k_r*R2O - kdr1*(A**2)*R2 + k_dr1*R2A2      #Repressor dimer Conc 
+    dR2Odt = kr*R2*O - k_r*R2O - kdr2*(A**2)*R2O + k_dr2*R2A2*O                         #Repressor-Operator Complex Conc
+    dAdt = -2*kdr1*(A**2)*R2 + 2*k_dr1*R2A2 + kdr2*(A**2)*R2O - k_dr2*R2A2*O            #Analyte Conc
+    dR2A2dt = kdr1*(A**2)*R2 - k_dr1*R2A2 - kdr2*(A**2)*R2O + k_dr2*R2A2*O              #Repressor-Analyte Complex Conc 
+    dOdt = -kr*R2*O + k_r*R2O + kdr2*(A**2)*R2O - k_dr2*R2A2*O                          #Operator Conc
+    dmFdt = (KTX1*(O**2)/((KTX1**2)+(O**2))) - lam_m1*mF + kleak*R2O                    #Reporter mRNA Conc
+    dFindt = (kTL1*TLR*(mF**3)/((KTL1**3)+(mF**3)+(mR**3))) - kmat*Fin                  #Inactive Reporter Conc
+    dFdt = kmat*Fin                                                                     #Active Reporter Conc  
+    dTLRdt = -vlamTLR*TLR/((KlamTLR)+(TLR))                                             #Translation Resources Conc
+    
+    return [dmRdt, dRdt, dR2dt, dR2Odt, dAdt, dR2A2dt, dOdt, dmFdt, dFindt, dFdt, dTLRdt]
+
+#Initial Conditions, conc in nM
+#Do not know what initialization values to use
+mR0 = 5
+R0 = 0
+R20 = 0
+R2O0 = 0
+A0 = 1
+R2A20 = 0
+O0 = 1
+mF0 = 0
+Fin0 = 0
+F0 = 0
+TLR0 = 1000
+
+GR = 10     #Gene Conc  
+
+z0 = [mR0,R0,R20,R2O0,A0,R2A20,O0,mF0,Fin0,F0,TLR0]
+
+#Time points(start, end, no. of points{default=50})
+t = np.linspace(0,200,100000)
+
+#Solve ODEs
+z = odeint(model,z0,t)
+
+#We want graph of the fluoroscent compound, F
+f = z[:,9]
+
+plt.plot(t,f,'g-')
+plt.xlabel('Time (min)')
+plt.ylabel('GFP (nM)')
+plt.figure(num=None, figsize=(10, 10), dpi=100, facecolor='w', edgecolor='k')
+plt.show()
+
+
+
+
+
