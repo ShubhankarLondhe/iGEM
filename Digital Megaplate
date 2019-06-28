@@ -30,7 +30,7 @@ def mutate_rich(seq):           #Mutations in Rich medium
     dna = list(seq)
     #print(dna)
     #print(seq)
-    i=2
+    i=3
     #print(len(dna))
     while i<len(dna):            #Don't want to mutate start codon therefore start with 2
         if dna[i] == 'N':
@@ -86,14 +86,14 @@ def mutate_poor(seq):          #Mutations in poor medium
     dna = list(seq)
     #print(dna)
     #print(seq)
-    i=2
+    i=3
     #print(len(dna))
     while i<len(dna):            #Don't want to mutate start codon therefore start with 2
         if dna[i] == 'N':
             dna.pop(i)
         else :
             z = random.random()
-            if z<1e-5:                         #Actual mutation rate in poor medium is 10^-7 /nt
+            if z<1e-5:                            #Actual mutation rate in poor medium is 10^-7 /nt
                 x = random.gauss(0,1)          #For Checking mutation type     
                 if x<=0.88:                    #Transversion
                     y = random.uniform(0,1)    #Choose which transversion
